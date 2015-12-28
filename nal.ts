@@ -1,12 +1,28 @@
 "use strict";
 
-import imm = require('mori');
+import mori = require('mori');
+
+const set = mori.sortedSet;
+const vector = mori.vector;
+
+type immVector<V> = mori.Vector<V>;
+type immuta<V> = mori.MoriObject<V>;
+const imm = mori.toClj;
+const mut = mori.toJs;
+
+
+
 
 module nal {
+
 
     /** term types */
     const T = new Array(16);
 
+
+    function opRel(op:number, rel:number):number {
+        return op | ((1+rel) << 16);
+    }
 
 
     class TType {
@@ -24,16 +40,25 @@ module nal {
 
         static numTypes:number = 0;
 
-        the(relation:number, subterms: Term[]):any {
-            console.log(this.ord, relation);
-            return imm.vector<any>(
-                imm.vector<number>(this.ord, relation),
-                this.commutative ? imm.set<Term[]>(subterms) : imm.vector<Term[]>(subterms)
-            );
+        the(subterms: Term[]):
+        immuta<any> {
+            return this.theR(-1, subterms);
+        }
+
+        theR(relation:number, subterms: Term[]):immuta<any> {
+            //return vector([
+            //    opRel(this.ord, relation),
+            //    this.commutative ? set(subterms) : vector(subterms)
+            //]);
+            return imm([
+                opRel(this.ord, relation),
+                this.commutative ? set(subterms) : subterms
+            ]);
         }
         //toString() { return this.sym; }
 
     }
+
 
     function initType(t:(x:number)=>TType):TType {
         var n = TType.numTypes++;
@@ -151,13 +176,17 @@ module nal {
         C
     }
 
-    class Term {
-        id: (string | imm.Vector<Term>)
+    //type Compound = [number, immVector<any>];
+    type Term = string | immVector<any>; //| Compound;
 
-        constructor(id:string|imm.Vector<Term>) {
-            this.id = id;
-        }
-    }
+
+    //class Term {
+    //    id: (string | imm.Vector<Term>)
+    //
+    //    constructor(id:string|imm.Vector<Term>) {
+    //        this.id = id;
+    //    }
+    //}
 
     interface Concept {
         id: Term
@@ -198,12 +227,14 @@ module nal {
     }
 
     console.log("Types\n",T);
-    console.log(
-        [new Term("a"), new Term("b")]
-    );
-    console.log(
-        INHERIT.the(-1, [new Term("a"), new Term("b")])
-    );
+
+    console.log( vector('a', 'b', 'c' ));
+
+    console.log( INHERIT.the(['a', 'b']) );
+    console.log( SIMILAR.the(['a', 'b']) );
+    console.log( SIMILAR.the(['c', INHERIT.the(['a', 'b'])]) );
+    //console.dir(i);
+
 
 
 }

@@ -204,7 +204,7 @@ declare module 'mori' {
     /**
      * Like set but keeps its elements ordered.
      */
-    function sorted_set <T>(...rest: T[]): SortedSet<T>;
+    function sortedSet <T>(...rest: T[]): SortedSet<T>;
 
 
     /**
@@ -769,14 +769,14 @@ declare module 'mori' {
     /**
      * Recursively transforms JavaScript arrays into Mori vectors, and JavaScript objects into Mori maps
      */
-    function js_to_clj ( js: any): MoriObject<any>;
+    function toClj ( js: any): MoriObject<any>;
 
 
     /**
      * Recursively transforms Mori values to JavaScript. sets/vectors/lists become Arrays, Keywords and Symbol become Strings, Maps become Objects.
      * Arbitrary keys are encoded to by key->js.
      */
-    function clj_to_js ( obj: MoriObject<any>): any
+    function toJs ( obj: MoriObject<any>): any
 
 
 }
