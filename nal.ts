@@ -10,56 +10,48 @@ module nal {
 
 
     class TType {
+        id:Symbol;
+        ord:number;
         sym:string;
+        commutative:boolean;
 
-        constructor(sym:string) {
+        constructor(id:number, sym:string, commutative:boolean) {
+            this.id = Symbol(id);
+            this.ord = (id);
             this.sym = sym;
+            this.commutative = commutative;
         }
 
         static numTypes:number = 0;
 
+        the(relation:number, subterms: Term[]):any {
+            console.log(this.ord, relation);
+            return imm.vector<any>(
+                imm.vector<number>(this.ord, relation),
+                this.commutative ? imm.set<Term[]>(subterms) : imm.vector<Term[]>(subterms)
+            );
+        }
         //toString() { return this.sym; }
 
     }
 
-    function initType(t:(x:number)=>TType):Symbol {
+    function initType(t:(x:number)=>TType):TType {
         var n = TType.numTypes++;
-        var s = Symbol(n);
-        T[n] = t(n);
-        return s;
+        return T[n] = t(n);
     }
 
 
-    const ATOM = initType((n)=> {
-        return new TType('.');
-    });
-    const INHERIT = initType((n)=> {
-        return new TType('-->');
-    });
-    const SIMILAR = initType((n)=> {
-        return new TType('<->');
-    });
+    const ATOM = initType(n=>
+        new TType(n, '.', false)
+        //subsMin=0, subsMax=0
+    );
+    const INHERIT = initType(n=>
+        new TType(n, '-->', false)
+    );
+    const SIMILAR = initType(n=>
+        new TType(n, '<->', true)
+    );
 
-    console.log("Types\n",T);
-
-//
-//    ATOM: {
-//        sym: '.',
-//        subsMin: 0, subsMax: 0
-//    },
-//
-//    INHERIT: {
-//
-//    },
-//
-//    SIMILAR: {
-//
-//    }
-//
-//
-//
-//    //..
-//}
 
     /** scalar unit truth measurement: freq,conf */
     class Truth {
@@ -159,8 +151,12 @@ module nal {
         C
     }
 
-    interface Term {
-        id: (string | Object)
+    class Term {
+        id: (string | imm.Vector<Term>)
+
+        constructor(id:string|imm.Vector<Term>) {
+            this.id = id;
+        }
     }
 
     interface Concept {
@@ -200,5 +196,14 @@ module nal {
         }
 
     }
+
+    console.log("Types\n",T);
+    console.log(
+        [new Term("a"), new Term("b")]
+    );
+    console.log(
+        INHERIT.the(-1, [new Term("a"), new Term("b")])
+    );
+
 
 }
